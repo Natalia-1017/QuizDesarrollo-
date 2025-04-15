@@ -185,7 +185,7 @@ fun DropdownSelector(
                         shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
                     )
             ) {
-                // Añadir un mensaje de texto para indicar que debe deslizarse
+                // Mensaje de texto para indicar que debe deslizarse
                 if (items.size > 2) {
                     Text(
                         text = "Desliza hacia arriba para ver las opciones",
