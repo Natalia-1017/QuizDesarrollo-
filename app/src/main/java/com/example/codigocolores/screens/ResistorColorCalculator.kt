@@ -1,22 +1,37 @@
 package com.example.codigocolores
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+
 
 @Composable
 fun Color() {
+    val coloresDigitos = listOf("Negro", "Marrón", "Rojo", "Naranja", "Amarillo", "Verde", "Azul", "Violeta", "Gris", "Blanco")
+    val valores = listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 
-    val colorNames = listOf("Negro", "Marrón", "Rojo", "Naranja", "Amarillo", "Verde", "Azul", "Violeta", "Gris", "Blanco")
-    val multiplicadores = listOf(1, 10, 100, 1000, 10000) // Para banda 3: Negro a Amarillo
-    val toleranciaColors = listOf("Ninguno", "Dorado", "Plateado")
-    val tolerancias = listOf("", "±5%", "±10%")
+    val coloresMultiplicador = listOf("Negro", "Marrón", "Rojo", "Naranja", "Amarillo")
+    val multiplicadores = listOf(1.0, 10.0, 100.0, 1000.0, 10000.0)
+
+    val coloresTolerancia = listOf("Dorado", "Plateado", "Ninguno")
+    val tolerancias = listOf("±5%", "±10%", "±20%")
 
     var banda1 by remember { mutableStateOf(0) }
     var banda2 by remember { mutableStateOf(0) }
@@ -24,65 +39,161 @@ fun Color() {
     var toleranciaIndex by remember { mutableStateOf(0) }
     var resultado by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Text("Código de Colores de Resistencias", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-
-        DropdownSelector("Banda 1", colorNames, banda1) { banda1 = it }
-        DropdownSelector("Banda 2", colorNames, banda2) { banda2 = it }
-        DropdownSelector("Banda 3 (Multiplicador)", colorNames.subList(0, 5), banda3) { banda3 = it }
-        DropdownSelector("Tolerancia", toleranciaColors, toleranciaIndex) { toleranciaIndex = it }
-
-        Button(onClick = {
-            val valor = ((banda1 * 10) + banda2) * multiplicadores[banda3]
-            resultado = "$valor Ω ${tolerancias[toleranciaIndex]}"
-        }) {
-            Text("Calcular")
-        }
-
-        if (resultado.isNotEmpty()) {
-            Text(
-                "Resultado: $resultado",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 32.dp), // Márgenes internos
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.colores),
+                contentDescription = "Resistencia",
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(bottom = 24.dp)
             )
+            Text(
+                text = "Código de Colores",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.CenterHorizontally) // Esto lo centra
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(8.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    DropdownSelector("Banda 1 (Primer dígito)", coloresDigitos, banda1) { banda1 = it }
+                    DropdownSelector("Banda 2 (Segundo dígito)", coloresDigitos, banda2) { banda2 = it }
+                    DropdownSelector("Banda 3 (Multiplicador)", coloresMultiplicador, banda3) { banda3 = it }
+                    DropdownSelector("Banda 4 (Tolerancia)", coloresTolerancia, toleranciaIndex) { toleranciaIndex = it }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    val valor = ((valores[banda1] * 10) + valores[banda2]) * multiplicadores[banda3]
+                    resultado = "${valor.toInt()} Ω ${tolerancias[toleranciaIndex]}"
+                },
+
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Calcular", color = Color.White, fontSize = 18.sp)
+                Icon(
+                    imageVector = Icons.Rounded.Calculate,
+                    contentDescription = "Calcular",
+                    tint = Color.White
+
+                )
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+            if (resultado.isNotEmpty()) {
+                Text(
+                    "Resultado: $resultado",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
 
 @Composable
-fun DropdownSelector(label: String, items: List<String>, selectedIndex: Int, onItemSelected: (Int) -> Unit) {
+fun DropdownSelector(
+    label: String,
+    items: List<String>,
+    selectedIndex: Int,
+    onItemSelected: (Int) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
+    var buttonWidth by remember { mutableStateOf(0) }
 
-    Column(horizontalAlignment = Alignment.Start) {
-        Text(label, fontWeight = FontWeight.SemiBold)
-        Box {
-            Button(
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = label,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    buttonWidth = coordinates.size.width
+                }
+        ) {
+            OutlinedButton(
                 onClick = { expanded = true },
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(
+                    bottomStart = if (expanded) 0.dp else 12.dp,
+                    bottomEnd = if (expanded) 0.dp else 12.dp,
+                    topStart = 12.dp,
+                    topEnd = 12.dp
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
-                Text(items[selectedIndex])
+                Text(
+                    text = items[selectedIndex],
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Desplegar menú"
+                )
             }
+
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { buttonWidth.toDp() })
+                    .heightIn(max = 250.dp) // Limita la altura para que no se salga de la pantalla
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+                    )
+                    .border(1.dp, MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
             ) {
+                // Este forEach es para ajustar la altura limitada
                 items.forEachIndexed { index, item ->
                     DropdownMenuItem(
                         text = { Text(item) },
                         onClick = {
                             onItemSelected(index)
                             expanded = false
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
         }
     }
 }
+
