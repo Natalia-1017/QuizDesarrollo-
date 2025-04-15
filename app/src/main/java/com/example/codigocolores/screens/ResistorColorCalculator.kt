@@ -40,15 +40,17 @@ fun Color() {
     var resultado by remember { mutableStateOf("") }
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxWidth() // Solo ocupa todo el ancho
+            .wrapContentHeight(), // Permite que el alto crezca más allá del tamaño de la pantalla
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp, vertical = 32.dp), // Márgenes internos
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                verticalArrangement = Arrangement.Top, // Para alinear desde arriba
+                horizontalAlignment = Alignment.CenterHorizontally // Mantener el contenido centrado horizontalmente
         ) {
             Image(
                 painter = painterResource(id = R.drawable.colores),
@@ -64,7 +66,7 @@ fun Color() {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.CenterHorizontally) // Esto lo centra
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -82,7 +84,7 @@ fun Color() {
                     DropdownSelector("Banda 4 (Tolerancia)", coloresTolerancia, toleranciaIndex) { toleranciaIndex = it }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Button(
                 onClick = {
                     val valor = ((valores[banda1] * 10) + valores[banda2]) * multiplicadores[banda3]
@@ -101,7 +103,7 @@ fun Color() {
 
                 )
             }
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             if (resultado.isNotEmpty()) {
                 Text(
                     "Resultado: $resultado",
@@ -113,7 +115,6 @@ fun Color() {
         }
     }
 }
-
 @Composable
 fun DropdownSelector(
     label: String,
@@ -168,19 +169,34 @@ fun DropdownSelector(
                     contentDescription = "Desplegar menú"
                 )
             }
-
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .width(with(LocalDensity.current) { buttonWidth.toDp() })
-                    .heightIn(max = 250.dp) // Limita la altura para que no se salga de la pantalla
+                    .heightIn(max = 60.dp) // Limita la altura del menú a 60dp
                     .background(
                         color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
                     )
-                    .border(1.dp, MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+                    )
             ) {
+                // Añadir un mensaje de texto para indicar que debe deslizarse
+                if (items.size > 2) {
+                    Text(
+                        text = "Desliza hacia arriba para ver las opciones",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
+
                 // Este forEach es para ajustar la altura limitada
                 items.forEachIndexed { index, item ->
                     DropdownMenuItem(
